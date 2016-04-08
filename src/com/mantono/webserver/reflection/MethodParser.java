@@ -39,26 +39,6 @@ public class MethodParser
 		return methodParams == resourceParams;
 	}
 
-	public boolean hasCorrectArgumentNames(Method method)
-	{
-		Resource resource = method.getDeclaredAnnotation(Resource.class);
-		final Matcher matches = findMatches(method);
-		Parameter[] parameters = method.getParameters();
-		String[] args = getResourceArguments(resource.value(), matches);
-		for(int i = 0; i < parameters.length; i++)
-		{
-			boolean match = false;
-			for(int n = 0; n < args.length; n++)
-			{
-				if(parameters[i].getName().equals(args[n]))
-					match = true;
-			}
-			if(!match)
-				return false;
-		}
-		return true;
-	}
-
 	private String[] getResourceArguments(String resourceUri, Matcher matches)
 	{
 		final List<String> args = new ArrayList<String>();
@@ -109,8 +89,6 @@ public class MethodParser
 			if(!hasCorrectArgumentLength(method))
 				throw new IllegalArgumentException("Method " + method.getName() + " has" + method.getParameterCount()
 						+ "parameters but resource URI has a different amount of parameters.");
-			if(!hasCorrectArgumentNames(method))
-				throw new IllegalArgumentException("Argument names did not match for method " + method.getName());
 		}
 	}
 }
