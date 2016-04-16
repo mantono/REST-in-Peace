@@ -15,6 +15,14 @@ public class ClassParser
 		this.loadedClass = inspectingClass;
 	}
 	
+	public static boolean hasResources(final Class<?> inspectingClass)
+	{
+		for(Method method : inspectingClass.getDeclaredMethods())
+			if(method.isAnnotationPresent(Resource.class))
+				return true;
+		return false;
+	}
+	
 	public boolean hasResources()
 	{
 		return getResourceMethods().size() > 0;

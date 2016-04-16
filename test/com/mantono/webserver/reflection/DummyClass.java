@@ -1,25 +1,27 @@
 package com.mantono.webserver.reflection;
 
+import com.mantono.webserver.WebPage;
 import com.mantono.webserver.rest.Resource;
+import com.mantono.webserver.rest.Response;
 import com.mantono.webserver.rest.Verb;
 
 public class DummyClass
 {
 	@Resource("/test")
-	public static String test0()
+	public static Response test0()
 	{
-		return "bah";
+		return new WebPage("<html><body>HEJ!<body></html>");
 	}
 	
 	@Resource("/test/%id")
-	public static String test1(final int id)
+	public static Response test1(final int id)
 	{
-		return "bah";
+		return new WebPage("<html><body>HEJ "+id+"!<body></html>");
 	}
 	
 	@Resource(verb = Verb.POST, value = "/test/%user/%password")
-	public static String test2(final String user, final String password)
+	public static Response test2(final String user, final String password)
 	{
-		return "bah";
+		return new WebPage("<html><body>HEJ!<body></html>");
 	}
 }

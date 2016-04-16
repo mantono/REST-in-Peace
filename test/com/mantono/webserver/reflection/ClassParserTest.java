@@ -32,6 +32,7 @@ public class ClassParserTest
 	public void testGetResourceMethods() throws ClassNotFoundException
 	{
 		final List<Method> methods = parser.getResourceMethods();
+		System.out.println(methods);
 		assertTrue(methods.size() == 3);
 	}	
 
