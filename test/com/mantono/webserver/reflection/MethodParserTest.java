@@ -23,7 +23,7 @@ public class MethodParserTest
 		ClassParser cParser = new ClassParser(dummy);
 		List<Method> methods = cParser.getResourceMethods();
 		MethodParser mParser = new MethodParser(methods);
-		mParser.getResources();
+		System.out.println(mParser.getResources());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

@@ -3,8 +3,8 @@ package com.mantono.webserver.reflection;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,6 +20,12 @@ public class MethodParser
 	public MethodParser(Collection<Method> methods)
 	{
 		this.methods = methods;
+	}
+	
+	public boolean hasCorrectReturnType(Method method)
+	{
+		final String returnType = "interface com.mantono.webserver.rest.Response";
+		return method.getReturnType().toString().equals(returnType);
 	}
 
 	public boolean isStatic(Method method)
@@ -37,20 +43,6 @@ public class MethodParser
 		final int methodParams = method.getParameterCount();
 		final int resourceParams = countRequestParameters(method);
 		return methodParams == resourceParams;
-	}
-
-	private String[] getResourceArguments(String resourceUri, Matcher matches)
-	{
-		final List<String> args = new ArrayList<String>();
-		while(matches.find())
-		{
-			final int start = matches.start();
-			final int end = matches.end();
-			final String arg = resourceUri.substring(start, end);
-			final String argPrefixRemoved = arg.replaceAll("\\%", "");
-			args.add(argPrefixRemoved);
-		}
-		return args.toArray(new String[args.size()]);
 	}
 
 	private Matcher findMatches(Method method)
@@ -75,20 +67,35 @@ public class MethodParser
 	public Map<Resource, Method> getResources()
 	{
 		verifyAllMethods();
-		return null;
+		Map<Resource, Method> resources = new HashMap<Resource, Method>();
+		for(Method method : methods)
+		{
+			final Resource[] resourceAnnotations = method.getAnnotationsByType(Resource.class);
+			for(Resource resource : resourceAnnotations)
+				resources.put(resource, method);
+		}
+		
+		return resources;
 	}
 
 	private void verifyAllMethods()
 	{
 		for(Method method : methods)
-		{
-			if(!isPublic(method))
-				throw new IllegalArgumentException("Method " + method.getName() + " is not public.");
-			if(!isStatic(method))
-				throw new IllegalArgumentException("Method " + method.getName() + " is not static.");
-			if(!hasCorrectArgumentLength(method))
-				throw new IllegalArgumentException("Method " + method.getName() + " has" + method.getParameterCount()
-						+ "parameters but resource URI has a different amount of parameters.");
-		}
+			isValidMethod(method);
+	}
+	
+	public boolean isValidMethod(final Method method)
+	{
+		if(!isPublic(method))
+			throw new IllegalArgumentException("Method " + method.getName() + " is not public.");
+		if(!isStatic(method))
+			throw new IllegalArgumentException("Method " + method.getName() + " is not static.");
+		if(!hasCorrectReturnType(method))
+			throw new IllegalArgumentException("Method " + method.getName() + " does not return a Respone");
+		if(!hasCorrectArgumentLength(method))
+			throw new IllegalArgumentException("Method " + method.getName() + " has" + method.getParameterCount()
+					+ "parameters but resource URI has a different amount of parameters.");
+		
+		return true;
 	}
 }
