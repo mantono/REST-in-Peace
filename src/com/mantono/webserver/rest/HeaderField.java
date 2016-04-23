@@ -4,6 +4,7 @@ public enum HeaderField
 {
 	DATE("Date"),
 	SERVER("Server"),
+	HOST("Host"),
 	LAST_MODIFIED("Last-Modified"),
 	ETAG("ETag"),
 	EXPIRES("Expires"),
@@ -18,6 +19,7 @@ public enum HeaderField
 	LOCATION("Location"),
 	CONNECTION("Connection"),
 	KEEP_ALIVE("Keep-Alive"),
+	USER_AGENT("User-Agent"),
 	REFRESH("Refresh");
 	
 	private final String name;
@@ -30,5 +32,15 @@ public enum HeaderField
 	public String getName()
 	{
 		return name;
+	}
+	
+	public static HeaderField fromString(final String input)
+	{
+		if(input != null)
+			for(HeaderField field : values())
+				if(field.getName().equalsIgnoreCase(input))
+					return field;
+		
+		return null;
 	}
 }

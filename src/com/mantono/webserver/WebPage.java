@@ -40,8 +40,7 @@ public class WebPage implements Response
 	{
 		Map<HeaderField, String> args = new HashMap<HeaderField, String>();
 		
-		final String rfcDate = LocalDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME);
-		args.put(HeaderField.DATE, rfcDate);
+		args.put(HeaderField.DATE, LocalDateTime.now().toString());
 		args.put(HeaderField.SERVER, "REST-in-Peace");
 		args.put(HeaderField.CONTENT_LENGTH, "" + body.length()*2);
 		args.put(HeaderField.CONTENT_TYPE, "text/html");

@@ -14,7 +14,7 @@ public class SocketListener
 	private final BlockingQueue<Socket> clientQueue;
 	private final ConnectionHandler connections;
 	
-	public SocketListener(int port)
+	public SocketListener(int port) throws ClassNotFoundException, IOException
 	{
 		this.port = port;
 		this.clientQueue = new ArrayBlockingQueue<Socket>(500);
@@ -44,7 +44,7 @@ public class SocketListener
 		}
 	}
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws ClassNotFoundException, IOException
 	{
 		SocketListener sl = new SocketListener(8888);
 		sl.listen();
