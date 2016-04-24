@@ -7,13 +7,13 @@ import java.util.Arrays;
 import com.mantono.webserver.rest.Resource;
 import com.mantono.webserver.rest.Verb;
 
-public class ResourceRequest
+public class Request
 {
 	private final Verb verb;
 	private final URI uri;
 	private final Header header;
 	
-	public ResourceRequest(final String verb, final String uri, final Header header) throws URISyntaxException
+	public Request(final String verb, final String uri, final Header header) throws URISyntaxException
 	{
 		this.verb = Verb.valueOf(verb);
 		this.uri = new URI(uri);

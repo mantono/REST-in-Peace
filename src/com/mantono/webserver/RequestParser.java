@@ -13,7 +13,7 @@ public class RequestParser
 {
 	private final static String HEADER = "(?:GET|POST|PUT|DELETE) ?[\\/\\w%&;+-]+ HTTP\\/\\d.\\d";
 	private final Socket socket;
-	private ResourceRequest resource;
+	private Request resource;
 	private final Header headerData;
 
 	public RequestParser(Socket socket) throws IOException, URISyntaxException
@@ -47,18 +47,18 @@ public class RequestParser
 		
 	}
 	
-	public ResourceRequest getResource()
+	public Request getResource()
 	{
 		return resource;
 	}
 
-	private ResourceRequest createResource(String line) throws URISyntaxException
+	private Request createResource(String line) throws URISyntaxException
 	{
 		final String[] resourceData = line.split("\\s");
 		final String verb = resourceData[0];
 		final String resourceUri = resourceData[1];
 		final String protocol = resourceData[2];
-		return new ResourceRequest(verb, resourceUri, headerData);
+		return new Request(verb, resourceUri, headerData);
 	}
 
 }

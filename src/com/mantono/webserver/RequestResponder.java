@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.mantono.webserver.rest.HeaderField;
 import com.mantono.webserver.rest.Resource;
 import com.mantono.webserver.rest.Response;
 import com.mantono.webserver.rest.ResponseCode;
@@ -35,7 +36,7 @@ public class RequestResponder implements Runnable
 					continue;
 				
 				RequestParser request = new RequestParser(socket);
-				ResourceRequest requestedResource = request.getResource();
+				Request requestedResource = request.getResource();
 				
 				Method method = null;
 				Resource resource = null;
@@ -51,7 +52,7 @@ public class RequestResponder implements Runnable
 				
 				if(method == null || resource == null)
 				{
-					writeBadRequest(socket);
+					notFound(socket);
 					continue;
 				}
 				
@@ -94,15 +95,16 @@ public class RequestResponder implements Runnable
 		}
 	}
 
-	private void writeBadRequest(final Socket socket) throws IOException
+	private void notFound(final Socket socket) throws IOException
 	{
-		WebPage response = new WebPage(ResponseCode.BAD_REQUEST);
+		WebPage response = new WebPage(ResponseCode.NOT_FOUND);
+		response.getHeader().set(HeaderField.CONTENT_LENGTH, "0");
 		ResponseSender rs = new ResponseSender(socket, response);
 		rs.send();
 		rs.close();
 	}
 
-	private Response execute(Method method, ResourceRequest resourceRequested, Resource resource) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	private Response execute(Method method, Request resourceRequested, Resource resource) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if(parameterTypes.length == 0)
