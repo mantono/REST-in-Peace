@@ -28,7 +28,9 @@ public class ConnectionHandler
 		BlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(100);
 		this.threadPool = new ThreadPoolExecutor(threads/2+1, threads, 5000, TimeUnit.MILLISECONDS, queue);
 		resources = findResources();
-		threadPool.execute(new RequestResponder(resources, socketQueue));
+		
+		for(int i = 0; i < threads; i++)
+			threadPool.execute(new RequestResponder(resources, socketQueue));
 	}
 
 	public ConnectionHandler(final int threads, final int queueSize) throws ClassNotFoundException, IOException
