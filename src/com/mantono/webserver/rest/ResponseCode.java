@@ -16,7 +16,9 @@ public enum ResponseCode
 	FORBIDDEN(403, "Forbidden"),
 	NOT_FOUND(404, "Not Found"),
 	
-	TEAPOT(418, "I'm a teapot");
+	TEAPOT(418, "I'm a teapot"),
+	
+	SERVICE_UNAVAILABLE(503, "Service Unavailable");
 	
 	
 	private final short code;
