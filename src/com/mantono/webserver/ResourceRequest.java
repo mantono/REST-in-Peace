@@ -11,13 +11,15 @@ public class ResourceRequest
 {
 	private final Verb verb;
 	private final URI uri;
+	private final Header header;
 	
-	public ResourceRequest(final String verb, final String uri) throws URISyntaxException
+	public ResourceRequest(final String verb, final String uri, final Header header) throws URISyntaxException
 	{
 		this.verb = Verb.valueOf(verb);
 		this.uri = new URI(uri);
+		this.header = header;
 	}
-	
+
 	public Verb getVerb()
 	{
 		return verb;
@@ -26,6 +28,11 @@ public class ResourceRequest
 	public URI getUri()
 	{
 		return uri;
+	}
+	
+	public Header getHeader()
+	{
+		return header;
 	}
 	
 	public boolean matchesResource(Resource resource)

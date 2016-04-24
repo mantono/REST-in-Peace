@@ -1,10 +1,10 @@
 package com.mantono.webserver.rest;
 
-import java.util.Map;
+import com.mantono.webserver.Header;
 
 public interface Response
 {
 	ResponseCode getResponseCode();
-	Map<HeaderField, String> getHeader();
+	Header getHeader();
 	CharSequence getBody();
 }

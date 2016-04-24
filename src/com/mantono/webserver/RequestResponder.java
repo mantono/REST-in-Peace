@@ -1,21 +1,14 @@
 package com.mantono.webserver;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.mantono.webserver.rest.HeaderField;
 import com.mantono.webserver.rest.Resource;
 import com.mantono.webserver.rest.Response;
 import com.mantono.webserver.rest.ResponseCode;
@@ -63,12 +56,9 @@ public class RequestResponder implements Runnable
 				}
 				
 				Response response = execute(method, requestedResource, resource);
-				
-				OutputStream socketOut = socket.getOutputStream();
-				PrintStream streamOut = new PrintStream(socketOut, true);
-				printRespone(streamOut, response);				
-				streamOut.flush();
-				socketOut.flush();
+				ResponseSender sender = new ResponseSender(socket, response);
+				sender.send();
+				sender.close();
 				
 			}
 			catch(InterruptedException e)
@@ -106,35 +96,15 @@ public class RequestResponder implements Runnable
 
 	private void writeBadRequest(final Socket socket) throws IOException
 	{
-		OutputStream socketOut = socket.getOutputStream();
-		PrintStream streamOut = new PrintStream(socketOut, true);
 		WebPage response = new WebPage(ResponseCode.BAD_REQUEST);
-		printRespone(streamOut, response);
-		streamOut.flush();
-		socketOut.flush();
-	}
-
-	private void printRespone(PrintStream streamOut, Response response)
-	{
-		streamOut.append("HTTP/1.1 ");
-		streamOut.append("" + response.getResponseCode().getCode());
-		streamOut.append(" " + response.getResponseCode().getDescription());
-		streamOut.append("\r\n");
-		streamOut.append("Content-Type: text/html; charset=utf-8");
-		for(Entry<HeaderField, String> entry : response.getHeader().entrySet())
-		{
-			final HeaderField field = entry.getKey();
-			final String value = entry.getValue();
-			streamOut.append(field.getName() + ": " + value +"\r\n");
-		}
-		streamOut.append("\r\n\r\n");
-		streamOut.append(response.getBody().toString());
-		streamOut.append("\r\n");
+		ResponseSender rs = new ResponseSender(socket, response);
+		rs.send();
+		rs.close();
 	}
 
 	private Response execute(Method method, ResourceRequest resourceRequested, Resource resource) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		final Class<?>[] parameterTypes = method.getParameterTypes();
+		Class<?>[] parameterTypes = method.getParameterTypes();
 		if(parameterTypes.length == 0)
 			return (Response) method.invoke(null);
 		
@@ -149,22 +119,61 @@ public class RequestResponder implements Runnable
 		final String[] parameters = resourceRequested.getParameters(parameterIndex);
 		final Object[] parametersAsObject = new Object[parameterIndex.length];
 		
-		for(int i = 0; i < parameterTypes.length; i++)
+		if(containsHeader(parameterTypes))
 		{
-			final Class<?> type = parameterTypes[i];
-			if(type.getName().equals("double"))
-				parametersAsObject[i] = Double.parseDouble(parameters[i]);
-			else if(type.getName().equals("double"))
-				parametersAsObject[i] = Float.parseFloat(parameters[i]);
-			else if(type.getName().equals("int"))
-				parametersAsObject[i] = Integer.parseInt(parameters[i]);
-			else if(type.getName().equals("long"))
-				parametersAsObject[i] = Long.parseLong(parameters[i]);
-			else
-				parametersAsObject[i] = parameters[i];
+			final int hIndex = indexOfHeaderParameter(parameterTypes);
+			parametersAsObject[hIndex] = resourceRequested.getHeader();
 		}
 		
+		insertResourceParameters(parameterTypes, parameters, parametersAsObject);
+		
 		return (Response) method.invoke(null, parametersAsObject);
+	}
+
+	private void insertResourceParameters(Class<?>[] parameterTypes, String[] parameters, Object[] parametersAsObject)
+	{
+		int n = 0;
+		for(int i = 0; i < parameterTypes.length; i++)
+		{
+			if(parametersAsObject[i] != null)
+				continue;
+			
+			final Class<?> type = parameterTypes[i];
+			if(type.getName().equals("double"))
+				parametersAsObject[i] = Double.parseDouble(parameters[n]);
+			else if(type.getName().equals("double"))
+				parametersAsObject[i] = Float.parseFloat(parameters[n]);
+			else if(type.getName().equals("int"))
+				parametersAsObject[i] = Integer.parseInt(parameters[n]);
+			else if(type.getName().equals("long"))
+				parametersAsObject[i] = Long.parseLong(parameters[n]);
+			else
+				parametersAsObject[i] = parameters[n];
+			
+			n++;
+		}
+	}
+
+	private int indexOfHeaderParameter(Class<?>[] parameterTypes)
+	{
+		for(int i = 0; i < parameterTypes.length; i++)
+			if(typeIsHeader(parameterTypes[i]))
+				return i;
+		return -1;
+	}
+
+	private boolean containsHeader(Class<?>[] parameterTypes)
+	{
+		for(Class<?> classType : parameterTypes)
+			if(typeIsHeader(classType))
+				return true;
+		return false;
+	}
+	
+	private boolean typeIsHeader(final Class<?> type)
+	{
+		Class<Header> header = Header.class;
+		return type.equals(header);
 	}
 
 }

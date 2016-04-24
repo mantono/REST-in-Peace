@@ -42,7 +42,17 @@ public class MethodParser
 	{
 		final int methodParams = method.getParameterCount();
 		final int resourceParams = countRequestParameters(method);
+		if(methodHasHeaderAsParameter(method))
+			return methodParams - 1 == resourceParams;
 		return methodParams == resourceParams;
+	}
+
+	private boolean methodHasHeaderAsParameter(Method method)
+	{
+		for(Class<?> type : method.getParameterTypes())
+			if(type.getName().equals("com.mantono.webserver.Header"))
+				return true;
+		return false;
 	}
 
 	private Matcher findMatches(Method method)

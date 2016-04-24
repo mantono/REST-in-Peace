@@ -1,10 +1,6 @@
 package com.mantono.webserver;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.mantono.webserver.rest.HeaderField;
 import com.mantono.webserver.rest.Response;
 import com.mantono.webserver.rest.ResponseCode;
@@ -12,7 +8,7 @@ import com.mantono.webserver.rest.ResponseCode;
 public class WebPage implements Response
 {
 	private final ResponseCode code;
-	private final Map<HeaderField, String> header;
+	private final Header header;
 	private final String body;
 	
 	public WebPage()
@@ -36,16 +32,16 @@ public class WebPage implements Response
 		this.header = setDefaultHeader();
 	}
 
-	private Map<HeaderField, String> setDefaultHeader()
+	private Header setDefaultHeader()
 	{
-		Map<HeaderField, String> args = new HashMap<HeaderField, String>();
+		Header header = new Header();
 		
-		args.put(HeaderField.DATE, LocalDateTime.now().toString());
-		args.put(HeaderField.SERVER, "REST-in-Peace");
-		args.put(HeaderField.CONTENT_LENGTH, "" + body.length()*2);
-		args.put(HeaderField.CONTENT_TYPE, "text/html; charset=utf-8");
+		header.set(HeaderField.DATE, LocalDateTime.now().toString());
+		header.set(HeaderField.SERVER, "REST-in-Peace");
+		header.set(HeaderField.CONTENT_LENGTH, "" + (body.length()+4));
+		header.set(HeaderField.CONTENT_TYPE, "text/html; charset=utf-8");
 		
-		return args;
+		return header;
 	}
 
 	@Override
@@ -55,7 +51,7 @@ public class WebPage implements Response
 	}
 
 	@Override
-	public Map<HeaderField, String> getHeader()
+	public Header getHeader()
 	{
 		return header;
 	}

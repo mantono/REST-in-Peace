@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.mantono.webserver.rest.HeaderField;
 import com.mantono.webserver.rest.Response;
+import com.mantono.webserver.rest.ResponseCode;
 
 public class ResponseSender
 {
@@ -33,22 +35,35 @@ public class ResponseSender
 	
 	private void printRespone(PrintStream streamOut, Response response)
 	{
-		streamOut.append("HTTP/1.1 ");
-		streamOut.append("" + response.getResponseCode().getCode());
-		streamOut.append(" " + response.getResponseCode().getDescription());
-		streamOut.append("\r\n");
-		//streamOut.append("Content-Type: text/html; charset=utf-8");
-		for(Entry<HeaderField, String> entry : response.getHeader().entrySet())
-		{
-			final HeaderField field = entry.getKey();
-			final String value = entry.getValue();
-			streamOut.append(field.getName() + ": " + value +"\r\n");
-		}
-		streamOut.append("\r\n\r\n");
+		streamOut.append(parseResponseCode(response.getResponseCode()));
+		streamOut.append(parseHeader(response.getHeader()));
 		streamOut.append(response.getBody().toString());
 		streamOut.append("\r\n");
 	}
 	
+	private CharSequence parseResponseCode(ResponseCode responseCode)
+	{
+		final StringBuilder responseCodeData = new StringBuilder();
+		responseCodeData.append("HTTP/1.1 ");
+		responseCodeData.append("" + response.getResponseCode().getCode());
+		responseCodeData.append(" " + response.getResponseCode().getDescription());
+		responseCodeData.append("\r\n");
+		return responseCodeData;
+	}
+
+	private CharSequence parseHeader(final Header header)
+	{
+		final StringBuilder headerData = new StringBuilder();
+		for(Entry<HeaderField, String> entry : header)
+		{
+			final HeaderField field = entry.getKey();
+			final String value = entry.getValue();
+			headerData.append(field.getName() + ": " + value +"\r\n");
+		}
+		headerData.append("\r\n\r\n");
+		return headerData;
+	}
+
 	public boolean close() throws IOException
 	{
 		if(!socket.isClosed())
