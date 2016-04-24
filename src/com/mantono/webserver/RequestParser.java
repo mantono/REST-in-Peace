@@ -13,7 +13,7 @@ import com.mantono.webserver.rest.HeaderField;
 
 public class RequestParser
 {
-	private final static String HEADER = "(?:GET|POST|PUT|DELETE) ?[\\/\\w]+ HTTP\\/\\d.\\d";
+	private final static String HEADER = "(?:GET|POST|PUT|DELETE) ?[\\/\\w%&;+-]+ HTTP\\/\\d.\\d";
 	private final Socket socket;
 	private ResourceRequest resource;
 	private final Map<HeaderField, String> headerData;

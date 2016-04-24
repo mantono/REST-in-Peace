@@ -144,7 +144,7 @@ public class RequestResponder implements Runnable
 		int arrayIndex = 0;
 		for(int i = 0; i < splitUri.length; i++)
 			if(splitUri[i].contains("%"))
-				parameterIndex[arrayIndex] = i;
+				parameterIndex[arrayIndex++] = i;
 		
 		final String[] parameters = resourceRequested.getParameters(parameterIndex);
 		final Object[] parametersAsObject = new Object[parameterIndex.length];
