@@ -43,7 +43,7 @@ public class WebPage implements Response
 		args.put(HeaderField.DATE, LocalDateTime.now().toString());
 		args.put(HeaderField.SERVER, "REST-in-Peace");
 		args.put(HeaderField.CONTENT_LENGTH, "" + body.length()*2);
-		args.put(HeaderField.CONTENT_TYPE, "text/html");
+		args.put(HeaderField.CONTENT_TYPE, "text/html; charset=utf-8");
 		
 		return args;
 	}
