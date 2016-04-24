@@ -20,7 +20,8 @@ public enum HeaderField
 	CONNECTION("Connection"),
 	KEEP_ALIVE("Keep-Alive"),
 	USER_AGENT("User-Agent"),
-	REFRESH("Refresh");
+	REFRESH("Refresh"),
+	AUTHORIZATION("Authorization");
 	
 	private final String name;
 	
