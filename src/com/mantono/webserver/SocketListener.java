@@ -25,7 +25,7 @@ public class SocketListener
 	{
 		Thread.currentThread().setName("SocketListener");
 		
-		try
+		try(ServerSocket incomingRequests = new ServerSocket())
 		{
 			ServerSocket incomingRequests = new ServerSocket();
 			incomingRequests.setReuseAddress(true);
