@@ -27,7 +27,6 @@ public class SocketListener
 		
 		try(ServerSocket incomingRequests = new ServerSocket())
 		{
-			ServerSocket incomingRequests = new ServerSocket();
 			incomingRequests.setReuseAddress(true);
 			incomingRequests.bind(new InetSocketAddress(port));
 			
