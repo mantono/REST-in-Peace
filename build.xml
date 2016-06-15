@@ -77,7 +77,7 @@
 </target>
 
 <target name="javadoc" description="Compiles JavaDocs for this project" depends="init">
-	<javadoc packagenames="duplicatesearcher.*,research.*" access="package" additionalparam="-link http://docs.oracle.com/javase/8/docs/api/ " author="false" sourcepath="src" destdir="${doc}" source="1.8">
+	<javadoc packagenames="com.mantono.webserver.*" access="package" additionalparam="-link http://docs.oracle.com/javase/8/docs/api/ " author="false" sourcepath="src" destdir="${doc}" source="1.8">
 	</javadoc>
 </target>
 
