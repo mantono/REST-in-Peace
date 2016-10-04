@@ -57,11 +57,4 @@ public class SocketListener
 		sender.send();
 		sender.close();
 	}
-
-	public static void main(String[] args) throws ClassNotFoundException, IOException
-	{
-		SocketListener sl = new SocketListener(8888);
-		sl.listen();
-	}
-
 }
