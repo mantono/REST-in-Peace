@@ -44,7 +44,11 @@ public class ConnectionHandler
 		ResourceFinder finder = new ResourceFinder();
 		final int found = finder.search();
 		if(found == 0)
-			return resourceMap;
+		{
+			System.err.print("No resources found in classpath -->");
+			System.err.println(System.getProperty("java.class.path"));
+			System.exit(4);
+		}
 		
 		List<Class<?>> classes = finder.getClasses();
 		for(Class<?> classX : classes)
