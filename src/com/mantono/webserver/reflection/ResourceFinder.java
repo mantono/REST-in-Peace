@@ -51,7 +51,8 @@ public class ResourceFinder
 		{
 			String className = getQualifiedClassName(c);
 			Class<?> loadedClass = Class.forName(className);
-			return ClassParser.hasResources(loadedClass);
+			final boolean foundResource = ClassParser.hasResources(loadedClass);
+			return foundResource;
 		}
 		catch(ClassNotFoundException e)
 		{
@@ -82,7 +83,8 @@ public class ResourceFinder
 	{
 		Pattern p = Pattern.compile(CLASS);
 		Matcher m = p.matcher(fileName.toString());
-		return m.find();
+		final boolean foundClassFile = m.find();
+		return foundClassFile;
 	}
 
 	private void loadClasses() throws ClassNotFoundException
@@ -94,8 +96,10 @@ public class ResourceFinder
 		}
 	}
 
-	public List<Class<?>> getClasses() throws ClassNotFoundException
+	public List<Class<?>> getClasses() throws ClassNotFoundException, IOException
 	{
+		if(pathResourceClasses == null)
+			search();
 		loadClasses();
 		return classes;
 	}
