@@ -13,7 +13,7 @@ public class ClassFinderTest
 		final ResourceFinder cf = new ResourceFinder();
 		final int found = cf.search();
 		System.out.println(cf.getClasses());
-		assertEquals(2, found);
+		assertEquals(1, found);
 	}
 
 }

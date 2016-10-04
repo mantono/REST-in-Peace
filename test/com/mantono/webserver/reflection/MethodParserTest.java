@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class MethodParserTest
@@ -26,6 +27,7 @@ public class MethodParserTest
 		System.out.println(mParser.getResources());
 	}
 	
+	@Ignore
 	@Test(expected=IllegalArgumentException.class)
 	public void testBadMethodParameters() throws ClassNotFoundException
 	{
@@ -36,6 +38,7 @@ public class MethodParserTest
 		mParser.getResources();
 	}
 
+	@Ignore
 	@Test
 	public void testGetResources()
 	{

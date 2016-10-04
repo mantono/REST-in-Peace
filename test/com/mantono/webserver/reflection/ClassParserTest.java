@@ -33,7 +33,7 @@ public class ClassParserTest
 	{
 		final List<Method> methods = parser.getResourceMethods();
 		System.out.println(methods);
-		assertTrue(methods.size() == 3);
+		assertTrue("Found methods: " + methods.size(), methods.size() == 5);
 	}	
 
 }
