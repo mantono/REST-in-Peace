@@ -82,10 +82,7 @@
 </target>
 
 <target name="package" description="Package files to JAR" depends="test,javadoc">
-	<jar jarfile="${dist}/${ant.project.name}-${DSTAMP}.jar" basedir="${dist}" />
-		<manifest>
-			<attribute name="Main-Class" value="${mainClass}"/>
-		</manifest>
+	<jar jarfile="${dist}/${ant.project.name}-${DSTAMP}.jar" basedir="${build}" />
 </target>
 
 <target name="deploy" description="Deploy code to server">
