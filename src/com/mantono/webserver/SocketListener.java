@@ -17,7 +17,7 @@ public class SocketListener
 	private final BlockingQueue<Socket> clientQueue;
 	private final ConnectionHandler connections;
 	
-	public SocketListener(int port) throws ClassNotFoundException, IOException
+	protected SocketListener(int port) throws ClassNotFoundException, IOException
 	{
 		this.port = port;
 		this.clientQueue = new ArrayBlockingQueue<Socket>(500);
