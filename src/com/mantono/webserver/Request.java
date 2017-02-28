@@ -1,11 +1,10 @@
 package com.mantono.webserver;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-
 import com.mantono.webserver.rest.Resource;
 import com.mantono.webserver.rest.Verb;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Request
 {

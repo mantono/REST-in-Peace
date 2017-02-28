@@ -1,11 +1,12 @@
 package com.mantono.webserver;
 
+import com.mantono.webserver.rest.HeaderField;
+
+import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.mantono.webserver.rest.HeaderField;
 
 public class Header implements Iterable<Entry<HeaderField, String>>
 {
@@ -14,11 +15,13 @@ public class Header implements Iterable<Entry<HeaderField, String>>
 	public Header(final Map<HeaderField, String> fields)
 	{
 		this.fields = fields;
+		set(HeaderField.DATE, LocalDateTime.now().toString());
+		set(HeaderField.SERVER, "REST-in-Peace");
 	}
 	
 	public Header()
 	{
-		this.fields = new EnumMap<HeaderField, String>(HeaderField.class);
+		this(new EnumMap<HeaderField, String>(HeaderField.class));
 	}
 	
 	public String get(HeaderField field)
@@ -34,6 +37,13 @@ public class Header implements Iterable<Entry<HeaderField, String>>
 	public void set(HeaderField field, String value)
 	{
 		fields.put(field, value);
+	}
+
+	public int setBodySize(final String body)
+	{
+		final int length = body.getBytes().length + 3;
+		set(HeaderField.CONTENT_LENGTH, "" + length);
+		return length;
 	}
 
 	@Override
