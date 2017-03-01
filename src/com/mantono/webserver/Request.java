@@ -60,13 +60,13 @@ public class Request
 	{
 		final String[] requestUri = uri.toString().split("/");
 		final String[] parameters = new String[index.length];
-		
+
 		int pIndex = 0;
-		
+
 		for(int i = 0; i < requestUri.length; i++)
 			if(i == index[pIndex])
 				parameters[pIndex++] = requestUri[i];
-		
+
 		return parameters;
 	}
 }

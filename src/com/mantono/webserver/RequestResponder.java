@@ -1,5 +1,10 @@
 package com.mantono.webserver;
 
+import com.mantono.webserver.rest.HeaderField;
+import com.mantono.webserver.rest.Resource;
+import com.mantono.webserver.rest.Response;
+import com.mantono.webserver.rest.ResponseCode;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,11 +13,6 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import com.mantono.webserver.rest.HeaderField;
-import com.mantono.webserver.rest.Resource;
-import com.mantono.webserver.rest.Response;
-import com.mantono.webserver.rest.ResponseCode;
 
 public class RequestResponder implements Runnable
 {
@@ -109,27 +109,12 @@ public class RequestResponder implements Runnable
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if(parameterTypes.length == 0)
 			return (Response) method.invoke(null);
-		
-		final String[] splitUri = resource.value().split("/");
-		final int[] parameterIndex = new int[parameterTypes.length];
-	
-		int arrayIndex = 0;
-		for(int i = 0; i < splitUri.length; i++)
-			if(splitUri[i].contains("%"))
-				parameterIndex[arrayIndex++] = i;
-		
-		final String[] parameters = resourceRequested.getParameters(parameterIndex);
-		final Object[] parametersAsObject = new Object[parameterIndex.length];
-		
-		if(containsHeader(parameterTypes))
-		{
-			final int hIndex = indexOfHeaderParameter(parameterTypes);
-			parametersAsObject[hIndex] = resourceRequested.getHeader();
-		}
-		
-		insertResourceParameters(parameterTypes, parameters, parametersAsObject);
-		
-		return (Response) method.invoke(null, parametersAsObject);
+
+		if(parameterTypes[0] != RequestData.class)
+			throw new IllegalArgumentException("Found method " + method + " that has parameter that is not a Request ("+parameterTypes[0]+")");
+
+		final RequestData data = new RequestData(resourceRequested, method);
+		return (Response) method.invoke(null, data);
 	}
 
 	private void insertResourceParameters(Class<?>[] parameterTypes, String[] parameters, Object[] parametersAsObject)

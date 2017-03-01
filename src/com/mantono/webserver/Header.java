@@ -3,6 +3,7 @@ package com.mantono.webserver;
 import com.mantono.webserver.rest.HeaderField;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,6 +29,12 @@ public class Header implements Iterable<Entry<HeaderField, String>>
 	{
 		return fields.get(field);
 	}
+
+	public Map<HeaderField, String> getFields()
+	{
+		return Collections.unmodifiableMap(fields);
+	}
+
 	
 	public boolean isSet(HeaderField field)
 	{
