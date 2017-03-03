@@ -10,6 +10,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -32,35 +34,20 @@ public class RequestResponder implements Runnable
 		{
 			try(final Socket socket = incoming.poll(30, TimeUnit.SECONDS))
 			{
+				final Instant start = Instant.now();
 				if(socket == null)
 					continue;
-				
-				RequestParser request = new RequestParser(socket);
-				Request requestedResource = request.getResource();
-				
-				Method method = null;
-				Resource resource = null;
-				for(Resource resourceInMap : resourceMap.keySet())
-				{
-					if(requestedResource.matchesResource(resourceInMap))
-					{
-						method = resourceMap.get(resourceInMap);
-						resource = resourceInMap;
-						break;
-					}
-				}
-				
-				if(method == null || resource == null)
-				{
-					notFound(socket);
-					continue;
-				}
-				
-				Response response = execute(method, requestedResource, resource);
+
+				RequestParser rParser = new RequestParser(socket, resourceMap);
+				Request request = rParser.getRequest();
+
+				Response response = execute(rParser.getMethod(), request);
 				ResponseSender sender = new ResponseSender(socket, response);
 				sender.send();
 				sender.close();
-				
+				final Instant end = Instant.now();
+				final Duration duration = Duration.between(start, end);
+				System.out.println(duration);
 			}
 			catch(InterruptedException e)
 			{
@@ -104,63 +91,17 @@ public class RequestResponder implements Runnable
 		rs.close();
 	}
 
-	private Response execute(Method method, Request resourceRequested, Resource resource) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	private Response execute(Method method, Request request) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
 		Class<?>[] parameterTypes = method.getParameterTypes();
+
 		if(parameterTypes.length == 0)
 			return (Response) method.invoke(null);
-
-		if(parameterTypes[0] != RequestData.class)
+		if(parameterTypes.length > 1)
+			throw new IllegalArgumentException("Found method " + method + " that has parameter than one parameter");
+		if(parameterTypes[0] != Request.class)
 			throw new IllegalArgumentException("Found method " + method + " that has parameter that is not a Request ("+parameterTypes[0]+")");
 
-		final RequestData data = new RequestData(resourceRequested, method);
-		return (Response) method.invoke(null, data);
+		return (Response) method.invoke(null, request);
 	}
-
-	private void insertResourceParameters(Class<?>[] parameterTypes, String[] parameters, Object[] parametersAsObject)
-	{
-		int n = 0;
-		for(int i = 0; i < parameterTypes.length; i++)
-		{
-			if(parametersAsObject[i] != null)
-				continue;
-			
-			final Class<?> type = parameterTypes[i];
-			if(type.getName().equals("double"))
-				parametersAsObject[i] = Double.parseDouble(parameters[n]);
-			else if(type.getName().equals("double"))
-				parametersAsObject[i] = Float.parseFloat(parameters[n]);
-			else if(type.getName().equals("int"))
-				parametersAsObject[i] = Integer.parseInt(parameters[n]);
-			else if(type.getName().equals("long"))
-				parametersAsObject[i] = Long.parseLong(parameters[n]);
-			else
-				parametersAsObject[i] = parameters[n];
-			
-			n++;
-		}
-	}
-
-	private int indexOfHeaderParameter(Class<?>[] parameterTypes)
-	{
-		for(int i = 0; i < parameterTypes.length; i++)
-			if(typeIsHeader(parameterTypes[i]))
-				return i;
-		return -1;
-	}
-
-	private boolean containsHeader(Class<?>[] parameterTypes)
-	{
-		for(Class<?> classType : parameterTypes)
-			if(typeIsHeader(classType))
-				return true;
-		return false;
-	}
-	
-	private boolean typeIsHeader(final Class<?> type)
-	{
-		Class<Header> header = Header.class;
-		return type.equals(header);
-	}
-
 }

@@ -1,72 +1,35 @@
 package com.mantono.webserver;
 
-import com.mantono.webserver.rest.Resource;
-import com.mantono.webserver.rest.Verb;
+import com.mantono.webserver.rest.HeaderField;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 
 public class Request
 {
-	private final Verb verb;
-	private final URI uri;
-	private final Header header;
-	
-	public Request(final String verb, final String uri, final Header header) throws URISyntaxException
+	private final Map<HeaderField, String> header;
+	private final Map<String, String> uriValues;
+	private final List<String> body;
+
+	public Request(Map<HeaderField, String> header, Map<String, String> uriValues, List<String> body)
 	{
-		this.verb = Verb.valueOf(verb);
-		this.uri = new URI(uri);
 		this.header = header;
+		this.uriValues = uriValues;
+		this.body = body;
 	}
 
-	public Verb getVerb()
+	public String get(final HeaderField key)
 	{
-		return verb;
-	}
-	
-	public URI getUri()
-	{
-		return uri;
-	}
-	
-	public Header getHeader()
-	{
-		return header;
-	}
-	
-	public boolean matchesResource(Resource resource)
-	{
-		if(resource.verb() != this.verb)
-			return false;
-		return matchesUri(resource.value());
+		return header.get(key);
 	}
 
-	public boolean matchesUri(String value)
+	public String get(final String key)
 	{
-		final String[] requestUri = uri.toString().split("/");
-		final String[] resourceUri = value.split("/");
-		if(requestUri.length != resourceUri.length)
-			return false;
-		
-		for(int i = 0; i < requestUri.length; i++)
-			if(!requestUri[i].equals(resourceUri[i]))
-				if(!resourceUri[i].substring(0, 1).equals("%"))
-					return false;
-		
-		return true;
+		return uriValues.get(key);
 	}
 
-	public String[] getParameters(final int... index)
+	public List<String> getBody()
 	{
-		final String[] requestUri = uri.toString().split("/");
-		final String[] parameters = new String[index.length];
-
-		int pIndex = 0;
-
-		for(int i = 0; i < requestUri.length; i++)
-			if(i == index[pIndex])
-				parameters[pIndex++] = requestUri[i];
-
-		return parameters;
+		return body;
 	}
 }
