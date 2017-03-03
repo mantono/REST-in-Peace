@@ -1,16 +1,14 @@
 package com.mantono.webserver.reflection;
 
+import com.mantono.webserver.rest.Resource;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.mantono.webserver.rest.Resource;
 
 public class MethodParser
 {
@@ -40,11 +38,7 @@ public class MethodParser
 
 	public boolean hasCorrectArgumentLength(Method method)
 	{
-		final int methodParams = method.getParameterCount();
-		final int resourceParams = countRequestParameters(method);
-		if(methodHasHeaderAsParameter(method))
-			return methodParams - 1 == resourceParams;
-		return methodParams == resourceParams;
+		return method.getParameterCount() <= 1;
 	}
 
 	private boolean methodHasHeaderAsParameter(Method method)
@@ -101,10 +95,10 @@ public class MethodParser
 		if(!isStatic(method))
 			throw new IllegalArgumentException("Method " + method.getName() + " is not static.");
 		if(!hasCorrectReturnType(method))
-			throw new IllegalArgumentException("Method " + method.getName() + " does not return a Respone");
+			throw new IllegalArgumentException("Method " + method.getName() + " does not return a Response.");
 		if(!hasCorrectArgumentLength(method))
-			throw new IllegalArgumentException("Method " + method.getName() + " has" + method.getParameterCount()
-					+ "parameters but resource URI has a different amount of parameters.");
+			throw new IllegalArgumentException("Method " + method.getName() + " has " + method.getParameterCount()
+					+ " parameters but only one method is allowed.");
 		
 		return true;
 	}
