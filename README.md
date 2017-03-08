@@ -10,9 +10,10 @@ See the [DummyClass](https://github.com/mantono/REST-in-Peace/blob/master/test/c
 
 ```
 @Resource("/path/%id")
-public static Response myMethod(final int id)
+public static Response test1(final Request request)
 {
-  return new WebPage("<html><body>Hello "+id+"!<body></html>");
+	final String id = request.get("id");
+	return new WebPage("<html><body>Hello "+id+"!<body></html>");
 }
 ```
 The method must be public and static, but has no limitation on naming conventions (beyond those of Java). The number of parameters in URI (in other words, the number of occurences of the `%` sign) must match the number of parameters in the method. Names of the respective parameters does not matter, only the order.
@@ -34,9 +35,11 @@ By default, all Resources are considered to be available through *GET*, unless s
 In the example below, we define a resource available through POST instead of GET.
 ```
 @Resource(verb = Verb.POST, value = "/test/%user/%token")
-public static Response testOfPost(final String user, final String token)
+public static Response testOfPost(final Request request)
 {
-  return new WebPage("<html><body>Output:<p><b>"+user+"</b></p><p><em>"+token+"</b></em><body></html>");
+	final String user = request.get("user");
+	final String token = request.get("token");
+	return new WebPage("<html><body>Output:<p><b>"+user+"</b></p><p><em>"+token+"</b></em><body></html>");
 }
 ```
 
