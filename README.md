@@ -16,8 +16,8 @@ public static Response test1(final Request request)
 	return new WebPage("<html><body>Hello "+id+"!<body></html>");
 }
 ```
-The method must be public and static, but has no limitation on naming conventions (beyond those of Java). The number of parameters in URI (in other words, the number of occurences of the `%` sign) must match the number of parameters in the method. Names of the respective parameters does not matter, only the order.
-The return type of the method must always be of type *Response*.
+The method must be public and static, but has no limitation on naming conventions (beyond those of Java). It is also required to take one and only one argument, a [Request](https://github.com/mantono/REST-in-Peace/blob/master/src/com/mantono/webserver/Request.java).
+The return type of the method must always be of type [Response](https://github.com/mantono/REST-in-Peace/blob/master/src/com/mantono/webserver/rest/Response.java).
 Response itself is an interface, but is simple enough to be implmentend by anyone.
 ```
 public interface Response
