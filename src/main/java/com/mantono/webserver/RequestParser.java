@@ -78,6 +78,8 @@ public final class RequestParser
 		List<String> b = new LinkedList<>();
 		final String contentType = header.get(HeaderField.CONTENT_TYPE);
 		final boolean decode = contentType != null && contentType.equals("application/x-www-form-urlencoded");
+		if(!header.isSet(HeaderField.CONTENT_LENGTH))
+			return b;
 		final int size = Integer.parseInt(header.get(HeaderField.CONTENT_LENGTH));
 		final char[] buffer = new char[size];
 		int read = -1;
