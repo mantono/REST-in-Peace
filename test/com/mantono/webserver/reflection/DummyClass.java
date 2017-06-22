@@ -2,7 +2,6 @@ package com.mantono.webserver.reflection;
 
 import com.mantono.webserver.Request;
 import com.mantono.webserver.WebPage;
-import com.mantono.webserver.rest.HeaderField;
 import com.mantono.webserver.rest.Resource;
 import com.mantono.webserver.rest.Response;
 import com.mantono.webserver.rest.Verb;
