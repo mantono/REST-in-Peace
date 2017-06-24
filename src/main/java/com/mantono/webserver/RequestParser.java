@@ -52,25 +52,30 @@ public final class RequestParser
 
 	private Header readHeader(BufferedReader socketStream) throws IOException
 	{
-		final Header header = new Header();
-		String line;
 
+		String line;
+		final Map<String, String> headerData = new HashMap<>(16);
+
+		socketStream.lines()
+				.map()
 		do
 		{
 			line = socketStream.readLine();
 			if(line == null)
 				break;
 			final String[] headerField = line.split("\\:", 2);
-			final HeaderField field = HeaderField.fromString(headerField[0]);
-			if(field == null)
-			{
-				System.out.println("Warning, ignoring unsupported header field " + headerField[0]);
-				continue;
-			}
-			header.set(field, headerField[1].trim());
+			headerData.put(headerField[0], headerField[1].trim());
+//			final HeaderField field = HeaderField.fromString(headerField[0]);
+//			if(field == null)
+//			{
+//				System.out.println("Warning, ignoring unsupported header field " + headerField[0]);
+//				continue;
+//			}
 		}while(line.length() != 0);
 
-		return header;
+		final Header header = new Header();
+
+		return new Header(fields, c);
 	}
 
 	private List<String> readBody(BufferedReader socketStream) throws IOException

@@ -9,18 +9,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Header implements Iterable<Entry<HeaderField, String>>
+@Deprecated
+public class HeaderX implements Iterable<Entry<HeaderField, String>>
 {
 	private final Map<HeaderField, String> fields;
 	
-	public Header(final Map<HeaderField, String> fields)
+	public HeaderX(final Map<HeaderField, String> fields)
 	{
 		this.fields = fields;
 		set(HeaderField.DATE, LocalDateTime.now().toString());
 		set(HeaderField.SERVER, "REST-in-Peace");
 	}
 	
-	public Header()
+	public HeaderX()
 	{
 		this(new EnumMap<HeaderField, String>(HeaderField.class));
 	}
