@@ -32,7 +32,7 @@ public class ClassParser
 	
 	public List<Method> getResourceMethods()
 	{
-		List<Method> resources = new ArrayList<Method>();
+		List<Method> resources = new ArrayList<>();
 		for(Method method : loadedClass.getDeclaredMethods())
 		{
 			if(method.isAnnotationPresent(Resource.class))

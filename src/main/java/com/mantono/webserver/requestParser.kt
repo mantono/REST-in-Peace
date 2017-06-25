@@ -1,8 +1,6 @@
 package com.mantono.webserver
 
-import com.mantono.webserver.rest.HeaderField
-import com.mantono.webserver.rest.Resource
-import com.mantono.webserver.rest.Verb
+import com.mantono.webserver.rest.*
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -14,7 +12,7 @@ import java.util.LinkedList
 import java.time.Duration
 
 
-private val HEADER = Regex("(?:GET|POST|PUT|DELETE) ?[/\\w%&;+-.]+ HTTPS?/\\d.\\d")
+private val HEADER = Regex("(?:GET|POST|PUT|DELETE) ?[/\\w%=?&;+-.]+ HTTPS?/\\d.\\d")
 
 private fun <T> Stream<T?>.notNull(): Stream<T> = filter { it != null }.map { it!! }
 
@@ -25,21 +23,37 @@ fun parseRequest(socket: Socket, resourceMap: Map<Resource, Method>): Request
 	val requestedResource = requestedResource(socketStream)
 	System.out.println(requestedResource)
 	val header: RequestHeader = readHeader(socketStream)
-	val body: List<String> = readBody(socketStream)
+	val body: String = readBody(socketStream, header[HeaderField.CONTENT_LENGTH], header[HeaderField.CONTENT_TYPE])
 
 	val resourceData: List<String> = requestedResource.split("\\s".toRegex())
 	val verb: Verb = Verb.valueOf(resourceData[0])
-	val uri: String = resourceData[1]
+	val uriAndQuery = resourceData[1].split("\\?".toRegex())
+	val uri: String = uriAndQuery[0]
+	val queryParameters: Map<String, String> = queryOf(uriAndQuery)
 	val resource: Resource? = findResource(verb, uri, resourceMap)
+
+	println(queryParameters)
 
 	return when(resource != null)
 	{
-		true -> ValidRequest(resource!!, header, mapValues(resource, uri), body)
+		true -> ValidRequest(resource!!, header, mapValues(resource, uri), queryParameters, body)
 		false -> InvalidRequest(requestedResource, header)
 	}
 }
 
-fun  mapValues(request: Resource, uriMapping: String): Map<String, String>
+fun queryOf(uriWithquery: List<String>): Map<String, String>
+{
+	if(uriWithquery.size == 1)
+		return emptyMap()
+
+	val query = uriWithquery[1]
+	if(query.isNullOrEmpty())
+		return emptyMap()
+
+	return stringToMap(query)
+}
+
+private fun mapValues(request: Resource, uriMapping: String): Map<String, String>
 {
 	val formal = request.value.split("/".toRegex())
 	val actual = uriMapping.split("/".toRegex())
@@ -62,7 +76,7 @@ fun  mapValues(request: Resource, uriMapping: String): Map<String, String>
 }
 
 //TODO Rewrite findResource, matchesResource and matchesUri as a stream/sequence
-fun findResource(verb: Verb, uri: String, resourceMap: Map<Resource, Method>): Resource?
+private fun findResource(verb: Verb, uri: String, resourceMap: Map<Resource, Method>): Resource?
 {
 	for (resourceInMap in resourceMap.keys)
 		if (matchesResource(verb, uri, resourceInMap))
@@ -171,24 +185,40 @@ private fun readHeader(socketStream: BufferedReader): RequestHeader
 	return RequestHeader(header)
 }
 
-private fun readBody(socketStream: BufferedReader): List<String>
+private fun readBody(socketStream: BufferedReader, size: String?, contentType: String?): String
 {
-	val b = LinkedList<String>()
-	val buffer = CharArray(32)
+	val bodySize: Int = Integer.parseInt(size ?: "0")
+	val type: ContentType = ContentType.from(contentType ?: "unknown")
+	val body: CharArray = when(bodySize)
+	{
+		0 -> CharArray(0)
+		else -> retrieveBody(socketStream, bodySize, type)
+	}
+
+	val bodyDecoded  = type.decode(body)
+	return bodyDecoded
+}
+
+private fun retrieveBody(socketStream: BufferedReader, size: Int, type: ContentType): CharArray
+{
+	val extraPadding: Int = size - (size % type.bufferSize)
+	val data = CharArray(size + extraPadding)
+	val bufferSize: Int = type.bufferSize.coerceAtMost(size)
+	var offset: Int = 0
 
 	while(socketStream.ready())
 	{
 		val start = Instant.now()
-		val read = socketStream.read(buffer, 0, 32)
+		val read = socketStream.read(data, offset, bufferSize)
 		if (read == -1)
 			break
-		val line = String(buffer)
-		b.add(line)
+
+		offset += bufferSize
 		System.out.println(Duration.between(start, Instant.now()))
-		System.out.print(line)
+		System.out.print(data)
 	}
 
-	return b
+	return data
 }
 
 private fun readStream(inputStream: InputStream?): List<String>
@@ -208,13 +238,6 @@ private fun readStream(inputStream: InputStream?): List<String>
 	}
 
 	return b
-
-
-	/*
-	val socketStream = BufferedReader(InputStreamReader(inputStream))
-	return socketStream.lines()
-			.notNull()
-			.toList()*/
 }
 
 private fun requestedResource(socketStream: BufferedReader): String
@@ -225,4 +248,13 @@ private fun requestedResource(socketStream: BufferedReader): String
 		true -> line
 		false -> throw IllegalArgumentException("Expected resource header, but got: $line")
 	}
+}
+
+fun stringToMap(input: String, pairDelimiter: String = "[&;]\\w+"): Map<String, String>
+{
+	return input.split(Regex(pairDelimiter)).asSequence()
+			.map { it.split("=") }
+			.filter { it.size == 2}
+			.map { Pair(it[0], it[1]) }
+			.toMap()
 }

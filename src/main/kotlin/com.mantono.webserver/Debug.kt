@@ -1,9 +1,6 @@
 package com.mantono.webserver
 
-import com.mantono.webserver.rest.HeaderField
-import com.mantono.webserver.rest.Resource
-import com.mantono.webserver.rest.Response
-import com.mantono.webserver.rest.ResponseCode
+import com.mantono.webserver.rest.*
 
 fun main(args: Array<String>)
 {
@@ -32,3 +29,9 @@ fun test3(str: String): Response
 	return WebPage(ResponseCode.ACCEPTED, ResponseHeader(), body)
 }
 */
+
+@Resource(verb = Verb.POST, value = "/test/post")
+fun testPost(request: ValidRequest): Response
+{
+	return WebPage(body = "<p>Got: ${request.body}<p/>")
+}

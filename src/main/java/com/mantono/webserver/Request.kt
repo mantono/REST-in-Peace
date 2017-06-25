@@ -8,9 +8,10 @@ sealed class Request
 }
 
 data class ValidRequest(val resource: Resource,
-                   override val header: RequestHeader,
-                   val uriValues: Map<String, String>,
-                   val body: List<String>): Request()
+                        override val header: RequestHeader,
+                        val uriValues: Map<String, String>,
+                        val queryParameters: Map<String, String>,
+                        val body: String): Request()
 {
 	operator fun get(key: String): String? = uriValues[key]
 }
