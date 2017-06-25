@@ -13,7 +13,7 @@ import kotlin.streams.toList
 import kotlinx.coroutines.experimental.*
 
 
-private val HEADER = Regex("(?:GET|POST|PUT|DELETE) ?[\\/\\w%&;+-\\.]+ HTTP\\/\\d.\\d")
+private val HEADER = Regex("(?:GET|POST|PUT|DELETE) ?[/\\w%&;+-.]+ HTTP/\\d.\\d")
 
 private fun <T> Stream<T?>.notNull(): Stream<T> = filter { it != null }.map { it!! }
 
