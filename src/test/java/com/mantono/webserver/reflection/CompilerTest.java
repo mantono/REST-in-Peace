@@ -1,6 +1,6 @@
 package com.mantono.webserver.reflection;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,9 +12,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class CompilerTest
 {
