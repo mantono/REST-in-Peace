@@ -28,6 +28,12 @@ public class ResourceFinder
 		pathResourceClasses = new ArrayList<Path>();
 		for(String path : classPath)
 		{
+			final Path pathToWalk = createPath(path);
+			if(!Files.exists(pathToWalk))
+			{
+				System.out.println("Found path in class path that does not exist: " + pathToWalk);
+				continue;
+			}
 			Stream<Path> paths = Files.walk(createPath(path));
 			List<Path> foundResources = paths
 				.filter(t -> isClassFile(t.getFileName()))

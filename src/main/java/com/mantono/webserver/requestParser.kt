@@ -9,8 +9,9 @@ import java.io.InputStreamReader
 import java.lang.reflect.Method
 import java.net.Socket
 import java.util.stream.Stream
-import kotlin.streams.toList
-import kotlinx.coroutines.experimental.*
+import java.time.Instant
+import java.util.LinkedList
+import java.time.Duration
 
 
 private val HEADER = Regex("(?:GET|POST|PUT|DELETE) ?[/\\w%&;+-.]+ HTTPS?/\\d.\\d")
@@ -19,20 +20,76 @@ private fun <T> Stream<T?>.notNull(): Stream<T> = filter { it != null }.map { it
 
 fun parseRequest(socket: Socket, resourceMap: Map<Resource, Method>): Request
 {
-	launch(commonPool){
-		val input: List<String> = readStream(socket.getInputStream())
-	}
-	val requestedResource = requestedResource(input.first())
+	val socketStream: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
+
+	val requestedResource = requestedResource(socketStream)
+	System.out.println(requestedResource)
+	val header: RequestHeader = readHeader(socketStream)
+	val body: List<String> = readBody(socketStream)
 
 	val resourceData: List<String> = requestedResource.split("\\s".toRegex())
 	val verb: Verb = Verb.valueOf(resourceData[0])
 	val uri: String = resourceData[1]
-	val endOfHeader: Int = findFirstEmptyLine(input)
-	val header: RequestHeader = parseHeader(input, endOfHeader)
+	val resource: Resource? = findResource(verb, uri, resourceMap)
 
-	val body = input.subList(endOfHeader, input.lastIndex)
+	return when(resource != null)
+	{
+		true -> ValidRequest(resource!!, header, mapValues(resource, uri), body)
+		false -> InvalidRequest(requestedResource, header)
+	}
+}
 
-	return Request(header, uriValues, body)
+fun  mapValues(request: Resource, uriMapping: String): Map<String, String>
+{
+	val formal = request.value.split("/".toRegex())
+	val actual = uriMapping.split("/".toRegex())
+	if (formal.size != actual.size)
+		throw IllegalArgumentException("Argument lengths is different: " + formal.size + " and " + actual.size + ".")
+
+	val map = HashMap<String, String>(formal.size)
+
+	for (i in formal.indices)
+	{
+		if (formal[i].length < 2 || formal[i].first() != '%') //TODO Simplify to only second part of if?
+			continue
+
+		val key = formal[i].substring(1)
+		val value = actual[i]
+		map.put(key, value)
+	}
+
+	return map
+}
+
+//TODO Rewrite findResource, matchesResource and matchesUri as a stream/sequence
+fun findResource(verb: Verb, uri: String, resourceMap: Map<Resource, Method>): Resource?
+{
+	for (resourceInMap in resourceMap.keys)
+		if (matchesResource(verb, uri, resourceInMap))
+			return resourceInMap
+	return null
+}
+
+private fun matchesResource(verb: Verb, uri: String, resource: Resource): Boolean
+{
+	if (resource.verb != verb)
+		return false
+	return matchesUri(resource.value, uri)
+}
+
+private fun matchesUri(value: String, uri: String): Boolean
+{
+	val requestUri = uri.split("/".toRegex())
+	val resourceUri = value.split("/".toRegex())
+	if (requestUri.size != resourceUri.size)
+		return false
+
+	for(i in requestUri.indices)
+		if(requestUri[i] != resourceUri[i])
+			if(resourceUri[i].substring(0, 1) != "%")
+				return false
+
+	return true
 }
 
 fun findFirstEmptyLine(input: List<String>): Int
@@ -93,19 +150,79 @@ fun asHeaderField(line: List<String>): Pair<HeaderField, String>
 	return Pair(field, value)
 }
 
-private suspend fun readStream(inputStream: InputStream?): List<String>
+private fun readHeader(socketStream: BufferedReader): RequestHeader
 {
+	val header: MutableMap<HeaderField, String> = HashMap()
+
+	do
+	{
+		val line: String = socketStream.readLine() ?: break
+		val headerField = line.split("\\:".toRegex(), 2).toTypedArray()
+		val field = HeaderField.fromString(headerField[0])
+		if (field == null)
+		{
+			println("Warning, ignoring unsupported header field " + headerField[0])
+			continue
+		}
+		header[field] = headerField[1].trim {it <= ' '}
+	}
+	while(line.isNotEmpty())
+
+	return RequestHeader(header)
+}
+
+private fun readBody(socketStream: BufferedReader): List<String>
+{
+	val b = LinkedList<String>()
+	val buffer = CharArray(32)
+
+	while(socketStream.ready())
+	{
+		val start = Instant.now()
+		val read = socketStream.read(buffer, 0, 32)
+		if (read == -1)
+			break
+		val line = String(buffer)
+		b.add(line)
+		System.out.println(Duration.between(start, Instant.now()))
+		System.out.print(line)
+	}
+
+	return b
+}
+
+private fun readStream(inputStream: InputStream?): List<String>
+{
+	val socketStream = BufferedReader(InputStreamReader(inputStream))
+	val b = LinkedList<String>()
+
+	val buffer = CharArray(32)
+
+	while (socketStream.ready())
+	{
+		val read = socketStream.read(buffer, 0, 32)
+		if (read == -1)
+			break
+		var line = String(buffer)
+		b.add(line)
+	}
+
+	return b
+
+
+	/*
 	val socketStream = BufferedReader(InputStreamReader(inputStream))
 	return socketStream.lines()
 			.notNull()
-			.toList()
+			.toList()*/
 }
 
-private fun requestedResource(line: String): String
+private fun requestedResource(socketStream: BufferedReader): String
 {
+	val line: String = socketStream.readLine()
 	return when(HEADER.matches(line))
 	{
 		true -> line
-		false -> "GET / HTTP/1.1"
+		false -> throw IllegalArgumentException("Expected resource header, but got: $line")
 	}
 }

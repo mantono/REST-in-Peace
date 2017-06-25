@@ -1,22 +1,16 @@
 package com.mantono.webserver.reflection;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MethodParserTest
 {
-
-	@Before
-	public void setUp() throws Exception
-	{
-	}
-
 	@Test
 	public void testCountRequestParameters() throws ClassNotFoundException
 	{
@@ -27,18 +21,18 @@ public class MethodParserTest
 		System.out.println(mParser.getResources());
 	}
 	
-	@Ignore
-	@Test(expected=IllegalArgumentException.class)
+	@Disabled
+	@Test
 	public void testBadMethodParameters() throws ClassNotFoundException
 	{
 		Class<?> dummy = Class.forName("com.mantono.webserver.reflection.BadResourceClass");
 		ClassParser cParser = new ClassParser(dummy);
 		List<Method> methods = cParser.getResourceMethods();
 		MethodParser mParser = new MethodParser(methods);
-		mParser.getResources();
+		assertThrows(IllegalArgumentException.class, ()->{mParser.getResources();});
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testGetResources()
 	{

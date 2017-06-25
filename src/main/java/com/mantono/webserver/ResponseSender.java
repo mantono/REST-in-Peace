@@ -51,10 +51,10 @@ public class ResponseSender
 		return responseCodeData;
 	}
 
-	private CharSequence parseHeader(final Header header)
+	private CharSequence parseHeader(final ResponseHeader header)
 	{
 		final StringBuilder headerData = new StringBuilder();
-		for(Entry<HeaderField, String> entry : header)
+		for(Entry<HeaderField, String> entry : header.getFields().entrySet())
 		{
 			final HeaderField field = entry.getKey();
 			final String value = entry.getValue();
