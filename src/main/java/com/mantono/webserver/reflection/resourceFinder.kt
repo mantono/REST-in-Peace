@@ -19,9 +19,9 @@ fun findResources(path: List<String> = classPath): Map<Resource, Method>
 	return  path.stream()
 			.parallel()
 			.map { File(it).toPath() }
+			.filter { Files.exists(it) }
 			.map { Files.walk(it) }
 			.flatMap { it }
-			.filter { Files.exists(it) }
 			.filter { isClassFile(it.fileName)}
 			.map { asClass(it) }
 			.filterNull()
@@ -53,7 +53,6 @@ fun hasCorrectParameters(method: Method): Boolean
 }
 
 private fun <T> Stream<T?>.filterNull(): Stream<T> = filter { it != null }.map { it!! }
-
 private fun isClassFile(fileName: Path): Boolean = CLASS.containsMatchIn(fileName.toString())
 
 fun asClass(pathClass: Path): Class<*>?
