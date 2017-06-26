@@ -1,6 +1,8 @@
 package com.mantono.webserver
 
 import com.mantono.webserver.rest.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.launch
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -29,9 +31,7 @@ class RequestResponder(private val resourceMap: Map<Resource, Method>, private v
 						is InvalidRequest -> notFound(request)
 					}
 
-					val sender = ResponseSender(socket, response)
-					sender.send()
-					sender.close()
+					send(socket, response)
 					val end = Instant.now()
 					val duration = Duration.between(start, end)
 					println(duration)

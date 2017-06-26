@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import com.mantono.webserver.rest.Response;
 import com.mantono.webserver.rest.ResponseCode;
 
+import static com.mantono.webserver.ResponseSenderKt.send;
+
 public class SocketListener
 {
 	private final int port;
@@ -53,8 +55,7 @@ public class SocketListener
 	private void returnServerBusy(Socket connection) throws IOException
 	{
 		final Response busy = new WebPage(ResponseCode.SERVICE_UNAVAILABLE);
-		ResponseSender sender = new ResponseSender(connection, busy);
-		sender.send();
-		sender.close();
+		send(connection, busy);
+		connection.close();
 	}
 }

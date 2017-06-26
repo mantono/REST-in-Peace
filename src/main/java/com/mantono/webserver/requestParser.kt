@@ -41,12 +41,12 @@ fun parseRequest(socket: Socket, resourceMap: Map<Resource, Method>): Request
 	}
 }
 
-fun queryOf(uriWithquery: List<String>): Map<String, String>
+fun queryOf(uriWithQuery: List<String>): Map<String, String>
 {
-	if(uriWithquery.size == 1)
+	if(uriWithQuery.size == 1)
 		return emptyMap()
 
-	val query = uriWithquery[1]
+	val query = uriWithQuery[1]
 	if(query.isNullOrEmpty())
 		return emptyMap()
 
