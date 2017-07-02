@@ -95,17 +95,17 @@ fun asClass(pathClass: Path): Class<*>?
 	return Class.forName(className)
 }
 
-private fun getQualifiedClassName(c: Path): String
+private fun getQualifiedClassName(p: Path): String
 {
-	var className: String = removeClassPath(c.toString()) ?: c.toString()
-	className = className.substring(0, className.length - 6)
-	className = className.replace("\\/".toRegex(), ".")
-	className = className.replaceFirst("\\B\\.".toRegex(), "")
-	return className
+	return p.toString()
+			.removeClassPath()
+			.removeSuffix(".class")
+			.removePrefix("/")
+			.replace("/", ".")
 }
 
-private fun removeClassPath(resource: String): String?
+fun String.removeClassPath(): String
 {
-	return classPath.firstOrNull {resource.contains(it)}
-			?.let {resource.replaceFirst(it.toRegex(), "")}
+	return classPath.firstOrNull {contains(it)}
+			?.let {replaceFirst(it.toRegex(), "")} ?: this
 }
