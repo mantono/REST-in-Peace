@@ -1,6 +1,7 @@
 package com.mantono.webserver
 
 import com.mantono.webserver.rest.Resource
+import java.nio.file.Path
 
 sealed class Request
 {
@@ -15,6 +16,9 @@ data class ValidRequest(val resource: Resource,
 {
 	operator fun get(key: String): String? = uriValues[key]
 }
+
+data class ValidStaticRequest(val file: Path,
+                              override val header: RequestHeader): Request()
 
 data class InvalidRequest(val requestedResource: String,
                           override val header: RequestHeader): Request()

@@ -1,9 +1,7 @@
 package com.mantono.webserver.reflection
 
 import com.mantono.webserver.ValidRequest
-import com.mantono.webserver.rest.ContentType
 import com.mantono.webserver.rest.Resource
-import com.mantono.webserver.rest.Verb
 import sun.misc.Request
 import java.io.File
 import java.lang.reflect.Method
@@ -14,7 +12,7 @@ import java.util.stream.Stream
 import kotlin.streams.asSequence
 import kotlin.streams.toList
 
-private val CLASS: Regex = Regex("\\w+\\.class\\b")
+private val CLASS_FILE: Regex = Regex("\\w+\\.class\\b")
 val classPath: List<String> = System.getProperty("java.class.path").split(":".toRegex())
 
 val staticResources: Map<String, Path> by lazy {
@@ -87,7 +85,7 @@ fun hasCorrectParameters(method: Method): Boolean
 }
 
 private fun <T> Stream<T?>.filterNull(): Stream<T> = filter { it != null }.map { it!! }
-private fun isClassFile(fileName: Path): Boolean = CLASS.containsMatchIn(fileName.toString())
+private fun isClassFile(fileName: Path): Boolean = CLASS_FILE.containsMatchIn(fileName.toString())
 
 fun asClass(pathClass: Path): Class<*>?
 {

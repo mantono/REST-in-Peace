@@ -1,12 +1,15 @@
 package com.mantono.webserver
 
+import com.mantono.webserver.reflection.staticResources
 import com.mantono.webserver.rest.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
+import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.net.Socket
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.BlockingQueue
@@ -25,9 +28,10 @@ class RequestResponder(private val resourceMap: Map<Resource, Method>, private v
 					println("Got a connection!")
 
 					val request = parseRequest(socket, resourceMap)
-					val response: Response = when(request)
+					val response: Response = when (request)
 					{
 						is ValidRequest -> createResponse(resourceMap, request)
+						is ValidStaticRequest -> createStaticResponse(request)
 						is InvalidRequest -> notFound(request)
 					}
 
@@ -72,6 +76,21 @@ class RequestResponder(private val resourceMap: Map<Resource, Method>, private v
 		return execute(method, request)
 	}
 
+	private fun  createStaticResponse(request: ValidStaticRequest): Response
+	{
+		val loadedFile: CharSequence = loadFile(request.file)
+		val fields = mapOf(HeaderField.CONTENT_TYPE to "image/png")
+		val header: ResponseHeader = ResponseHeader(fields)
+		return SimpleResponse(ResponseCode.OK, header, body = loadedFile)
+	}
+
+	private fun loadFile(filePath: Path): CharSequence
+	{
+		if(!filePath.toFile().exists())
+			throw IllegalStateException("File does not exist: $filePath")
+		return String(Files.readAllBytes(filePath))
+	}
+
 	private fun notFound(request: InvalidRequest): Response
 	{
 		// TODO Check if there is a default method for invalid request not found
@@ -79,7 +98,6 @@ class RequestResponder(private val resourceMap: Map<Resource, Method>, private v
 		return SimpleResponse(ResponseCode.NOT_FOUND)
 	}
 
-	@Throws(IllegalAccessException::class, IllegalArgumentException::class, InvocationTargetException::class)
 	private fun execute(method: Method, request: Request): Response
 	{
 		val parameterTypes = method.parameterTypes

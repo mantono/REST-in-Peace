@@ -1,5 +1,6 @@
 package com.mantono.webserver
 
+import com.mantono.webserver.reflection.staticResources
 import com.mantono.webserver.rest.*
 import java.io.BufferedReader
 import java.io.InputStream
@@ -29,6 +30,8 @@ fun parseRequest(socket: Socket, resourceMap: Map<Resource, Method>): Request
 	val verb: Verb = Verb.valueOf(resourceData[0])
 	val uriAndQuery = resourceData[1].split("\\?".toRegex())
 	val uri: String = uriAndQuery[0]
+	if(uri in staticResources)
+		return ValidStaticRequest(staticResources[uri]!!, header)
 	val queryParameters: Map<String, String> = queryOf(uriAndQuery)
 	val resource: Resource? = findResource(verb, uri, resourceMap)
 
