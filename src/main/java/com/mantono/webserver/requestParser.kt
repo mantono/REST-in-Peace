@@ -96,6 +96,12 @@ private fun matchesResource(verb: Verb, uri: String, resource: Resource): Boolea
 
 private fun matchesUri(value: String, uri: String): Boolean
 {
+	if(value == uri)
+		return true
+
+	if(value == "/")
+		return false
+
 	val requestUri = uri.split("/".toRegex())
 	val resourceUri = value.split("/".toRegex())
 	if (requestUri.size != resourceUri.size)
