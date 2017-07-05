@@ -81,10 +81,7 @@ private fun mapValues(request: Resource, uriMapping: String): Map<String, String
 //TODO Rewrite findResource, matchesResource and matchesUri as a stream/sequence
 private fun findResource(verb: Verb, uri: String, resourceMap: Map<Resource, Method>): Resource?
 {
-	for (resourceInMap in resourceMap.keys)
-		if (matchesResource(verb, uri, resourceInMap))
-			return resourceInMap
-	return null
+	return resourceMap.keys.firstOrNull {matchesResource(verb, uri, it)}
 }
 
 private fun matchesResource(verb: Verb, uri: String, resource: Resource): Boolean
