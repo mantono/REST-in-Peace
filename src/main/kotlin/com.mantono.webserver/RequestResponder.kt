@@ -38,7 +38,7 @@ class RequestResponder(private val resourceMap: Map<Resource, Method>, private v
 					send(socket, response)
 					val end = Instant.now()
 					val duration = Duration.between(start, end)
-					println(duration)
+					println("Time from request to response: $duration")
 				}
 			}
 			catch (e: InterruptedException)
@@ -76,7 +76,7 @@ class RequestResponder(private val resourceMap: Map<Resource, Method>, private v
 		return execute(method, request)
 	}
 
-	private fun  createStaticResponse(request: ValidStaticRequest): Response
+	private fun createStaticResponse(request: ValidStaticRequest): Response
 	{
 		val loadedFile: CharSequence = loadFile(request.file)
 		val fields = mapOf(HeaderField.CONTENT_TYPE to "image/png")

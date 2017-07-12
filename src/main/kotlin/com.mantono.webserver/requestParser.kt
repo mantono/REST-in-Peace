@@ -3,13 +3,11 @@ package com.mantono.webserver
 import com.mantono.webserver.reflection.staticResources
 import com.mantono.webserver.rest.*
 import java.io.BufferedReader
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.lang.reflect.Method
 import java.net.Socket
 import java.util.stream.Stream
 import java.time.Instant
-import java.util.LinkedList
 import java.time.Duration
 
 
@@ -112,64 +110,6 @@ private fun matchesUri(value: String, uri: String): Boolean
 	return true
 }
 
-fun findFirstEmptyLine(input: List<String>): Int
-{
-	for(i in input.indices)
-		if(input[i].isEmpty())
-			return i
-	return -1
-}
-
-fun parseHeader(input: List<String>, endOfHeader: Int): RequestHeader
-{
-	val headerFields: MutableMap<HeaderField, String> = HashMap(16)
-
-	input.stream()
-			.skip(1L)
-			.limit(endOfHeader-1L)
-			.map { it.split("\\:".toRegex(), 2) }
-			.notNull()
-			.filter { isHeaderField(it) }
-			.map { asHeaderField(it) }
-			.forEach { append(it, headerFields) }
-
-	val cookies: MutableMap<String, String> = HashMap(8)
-
-	input.stream()
-			.skip(1L)
-			.limit(endOfHeader-1L)
-			.filter(::isCookie)
-			.map(::readCookieData)
-			.forEach { cookies.put(it.first, it.second) }
-
-	return RequestHeader(headerFields, cookies)
-}
-
-fun readCookieData(line: String): Pair<String, String>
-{
-	val data: String = line.split("; ")[0]
-	val keyValue: List<String> = data.split("=")
-	return Pair(keyValue[0], keyValue[1])
-}
-
-fun append(it: Pair<HeaderField, String>, headerFields: MutableMap<HeaderField, String>)
-{
-	val value: String? = headerFields.putIfAbsent(it.first, it.second)
-	if(value != null)
-		headerFields.put(it.first, value + "; " + it.second)
-}
-
-fun isCookie(field: String): Boolean = field.matches(Regex("^Cookie:"))
-
-fun isHeaderField(line: List<String>): Boolean = HeaderField.fromString(line[0]) != null
-
-fun asHeaderField(line: List<String>): Pair<HeaderField, String>
-{
-	val field: HeaderField = HeaderField.fromString(line[0])
-	val value = line[1].trim()
-	return Pair(field, value)
-}
-
 private fun readHeader(socketStream: BufferedReader): RequestHeader
 {
 	val header: MutableMap<HeaderField, String> = HashMap()
@@ -220,35 +160,16 @@ private fun retrieveBody(socketStream: BufferedReader, size: Int, type: ContentT
 			break
 
 		offset += bufferSize
-		System.out.println(Duration.between(start, Instant.now()))
+		System.out.println("Read body packet in " + Duration.between(start, Instant.now()))
 		System.out.print(data)
 	}
 
 	return data
 }
 
-private fun readStream(inputStream: InputStream?): List<String>
-{
-	val socketStream = BufferedReader(InputStreamReader(inputStream))
-	val b = LinkedList<String>()
-
-	val buffer = CharArray(32)
-
-	while (socketStream.ready())
-	{
-		val read = socketStream.read(buffer, 0, 32)
-		if (read == -1)
-			break
-		var line = String(buffer)
-		b.add(line)
-	}
-
-	return b
-}
-
 private fun requestedResource(socketStream: BufferedReader): String
 {
-	val line: String = socketStream.readLine()
+	val line: String = socketStream.readLine() ?: "NULL REQUEST"
 	return when(HEADER.matches(line))
 	{
 		true -> line
