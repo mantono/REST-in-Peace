@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.mantono.webserver.Header;
+import com.mantono.webserver.RequestHeader;
 
 public class Authenticator implements Serializable
 {
@@ -36,7 +36,7 @@ public class Authenticator implements Serializable
 		return create(manager, true, true);
 	}
 
-	public boolean isAuthenticated(Header header, int user)
+	public boolean isAuthenticated(RequestHeader header, int user)
 	{
 		// TODO Auto-generated method stub
 		return true;

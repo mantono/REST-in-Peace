@@ -10,6 +10,8 @@ public enum ResponseCode
 	OK(200, "OK"),
 	CREATED(201, "Created"),
 	ACCEPTED(202, "Accepted"),
+
+	SEE_OTHER(303, "See Other"),
 	
 	BAD_REQUEST(400, "Bad Request"),
 	UNAUTHORIZED(401, "Unauthorized"),
